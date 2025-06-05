@@ -9,6 +9,19 @@
             (#{df.dishId},#{df.name},#{df.value})
         </foreach>
     </insert>
+    <update id="upDate">
+        <foreach collection="dishFlavors" separator=";" item="df">
+            <if test="df.name != null or df.dishId != null or df.value != null">
+                update dish_flavor
+                <set>
+                    <if test="df.name != null">name=#{df.name},</if>
+                    <if test="df.dishId != null">dish_id=#{df.dishId},</if>
+                    <if test="df.value != null">value=#{df.value},</if>
+                </set>
+                where id = #{df.id}
+            </if>
+        </foreach>
+    </update>
     <delete id="deleteByDishId">
         delete from dish_flavor where dish_id = #{dishId}
     </delete>
@@ -18,4 +31,7 @@
             #{id}
         </foreach>
     </delete>
+    <select id="getByDishId" resultType="com.sky.entity.DishFlavor">
+        select * from dish_flavor where dish_id = #{id}
+    </select>
 </mapper>

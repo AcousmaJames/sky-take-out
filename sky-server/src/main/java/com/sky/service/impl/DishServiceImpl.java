@@ -45,16 +45,15 @@ public class DishServiceImpl implements DIshService {
         //在xml文件中加使用主键id，并添加返回赋值给对象id
         Long id = dish.getId();
         //向口味表中批量插入数据
-        List<DishFlavor> flavors = new ArrayList<>();
-        if(flavors != null && flavors.size() > 0){
+        // todo 插入数据有问题
+        List<DishFlavor> flavors = new ArrayList<>(); //待解决
+        if(dishDTO.getFlavors() != null && !dishDTO.getFlavors().isEmpty()){
+            flavors = dishDTO.getFlavors();
             flavors.forEach(flavor -> {
                 flavor.setDishId(id);
             });
             dishFlavorMapper.insertBatch(flavors);
-
         }
-
-
     }
 
     /**
@@ -107,5 +106,32 @@ public class DishServiceImpl implements DIshService {
 //            //删除关联的口味表
 //            dishFlavorMapper.deleteByDishId(id);
 //        }
+    }
+
+    @Override
+    public DishVO getById(Long id) {
+        Dish dish = dishMapper.getById(id);
+        DishVO dishVO = new DishVO();
+        BeanUtils.copyProperties(dish, dishVO);
+        List<DishFlavor> dishFlavors =  dishFlavorMapper.getByDishId(id);
+//        BeanUtils.copyProperties(dishFlavors, dishVO.getFlavors());
+        dishVO.setFlavors(dishFlavors);
+        return dishVO;
+
+    }
+
+    @Override
+    public void upDate(DishVO dishVo) {
+        Dish dish = new Dish();
+        BeanUtils.copyProperties(dishVo,dish);
+        List<DishFlavor> dishFlavors;
+        dishFlavors = dishVo.getFlavors();
+        dishMapper.upDate(dish);
+//        dishFlavorMapper.upDate(dishFlavors);
+        dishFlavorMapper.deleteByDishId(dish.getId());
+        for(DishFlavor dishFlavor : dishFlavors){
+            dishFlavor.setDishId(dish.getId());
+        }
+        dishFlavorMapper.insertBatch(dishFlavors);
     }
 }

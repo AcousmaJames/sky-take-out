@@ -1,7 +1,9 @@
 package com.sky.mapper;
 
 
+import com.sky.annotation.AutoFill;
 import com.sky.entity.DishFlavor;
+import com.sky.enumeration.OperationType;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -25,4 +27,18 @@ public interface DishFlavorMapper {
      * @param ids
      */
     void deleteByDishIds(List<Long> ids);
+
+    /**
+     * 根据dish_id获取flavor
+     * @param id
+     * @return
+     */
+    List<DishFlavor> getByDishId(Long id);
+
+    /**
+     * 修改口味表
+     * @param dishFlavors
+     */
+//    @AutoFill(value = OperationType.UPDATE)
+    void upDate(List<DishFlavor> dishFlavors);
 }
