@@ -5,16 +5,18 @@ import com.sky.dto.DishDTO;
 import com.sky.dto.DishPageQueryDTO;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
-import com.sky.service.DIshService;
+import com.sky.service.DishService;
 import com.sky.vo.DishVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.PrivateKey;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("admin/dish")
@@ -22,7 +24,12 @@ import java.util.List;
 @Slf4j
 public class DishController {
     @Autowired
-    private DIshService dishService;
+    private DishService dishService;
+
+    @Qualifier("redisTemplate")
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     /**
      * 新建菜品
      */
@@ -31,6 +38,8 @@ public class DishController {
     public Result save(@RequestBody DishDTO dishDto) {
         log.info("新增菜品：{}", dishDto);
         dishService.saveWithFlavor(dishDto);
+        String key ="dish_" + dishDto.getCategoryId();
+        cleanCache(key);
         return Result.success();
     }
 
@@ -57,6 +66,8 @@ public class DishController {
     public Result deleteBatch(@RequestParam List<Long> ids){
         log.info("批量删除菜品：{}",ids);
         dishService.deleteBatch(ids);
+        //删除所有缓存dish_*
+        cleanCache("dish_*");
         return Result.success();
     }
 
@@ -83,6 +94,7 @@ public class DishController {
     public Result update(@RequestBody DishVO dishVo) {
         log.info("修改菜品{}",dishVo);
         dishService.upDate(dishVo);
+        cleanCache("dish_*");
         return Result.success();
     }
     @PostMapping("/status/{status}")
@@ -90,6 +102,13 @@ public class DishController {
     public Result startOrStop(@PathVariable Integer status,Long id) {
         log.info("菜品起售停售：{}:{}",id,status);
         dishService.upDate(id,status);
+        cleanCache("dish_*");
         return Result.success();
+    }
+
+    private void cleanCache(String patten) {
+        //根据key删除缓存
+        Set keys = redisTemplate.keys(patten);
+        redisTemplate.delete(keys);
     }
 }
