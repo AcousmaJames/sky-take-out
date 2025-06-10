@@ -42,4 +42,6 @@ public interface DIshService {
      * @param dishVo
      */
     void upDate(DishVO dishVo);
+
+    void upDate(Long dishId, Integer status);
 }
