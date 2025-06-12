@@ -11,17 +11,19 @@ import com.sky.entity.DishFlavor;
 import com.sky.exception.DeletionNotAllowedException;
 import com.sky.mapper.DishFlavorMapper;
 import com.sky.mapper.DishMapper;
-import com.sky.mapper.SetmealDIshMapper;
+import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
 import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.NullValueInNestedPathException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -32,7 +34,7 @@ public class DishServiceImpl implements DishService {
     @Autowired
     private DishFlavorMapper dishFlavorMapper;
     @Autowired
-    private SetmealDIshMapper setmealDIshMapper;
+    private SetmealDishMapper setmealDIshMapper;
 
     @Override
     @Transactional //事务特性，原子性
@@ -168,6 +170,32 @@ public class DishServiceImpl implements DishService {
         }
 
         return dishVOList;
+    }
+
+    /**
+     * 根据分类id查询菜品
+     * @param categoryId
+     * @return
+     */
+    @Override
+    public List<DishVO> list(Long categoryId) {
+        Dish dish = new Dish();
+        dish.setCategoryId(categoryId);
+        List<Dish> dishList = dishMapper.list(dish);
+        if(dishList != null && !dishList.isEmpty()){
+            List<DishVO> dishVOList = new ArrayList<>();
+            for(Dish d : dishList){
+                DishVO dishVO = new DishVO();
+                BeanUtils.copyProperties(d,dishVO);
+                dishVOList.add(dishVO);
+            }
+            return dishVOList;
+        }
+        else
+        {
+            return null;
+        }
+//        return Collections.emptyList();
     }
 
 }

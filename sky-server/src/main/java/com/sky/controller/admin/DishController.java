@@ -6,6 +6,7 @@ import com.sky.dto.DishPageQueryDTO;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.DishService;
+import com.sky.vo.DishItemVO;
 import com.sky.vo.DishVO;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -106,6 +107,13 @@ public class DishController {
         return Result.success();
     }
 
+    @GetMapping("/list")
+    @ApiOperation("根据分类id查询菜品")
+    public Result<List<DishVO>> list(Long categoryId) {
+        log.info("根据分类查询菜品:{}",categoryId);
+        List<DishVO> list = dishService.list(categoryId);
+        return Result.success(list);
+    }
     private void cleanCache(String patten) {
         //根据key删除缓存
         Set keys = redisTemplate.keys(patten);
